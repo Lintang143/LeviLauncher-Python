@@ -6,7 +6,7 @@
 
 #include <pl/Mod.hpp>
 
-namespace clange_me {
+namespace loader {
 
 class ClangeMeMod {
   public:
