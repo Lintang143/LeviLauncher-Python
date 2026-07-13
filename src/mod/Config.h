@@ -5,7 +5,7 @@
 
 #include <pl/Config.hpp>
 
-namespace clange_me {
+namespace loader {
 
 struct ModConfig {
     int version = 1;
