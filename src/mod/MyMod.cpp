@@ -133,4 +133,4 @@ bool ClangeMeMod::unload() {
     return true;
 }
 
-} // namespace loader
+} // namespace clange_me
