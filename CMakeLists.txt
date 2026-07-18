@@ -15,6 +15,52 @@ set(MOD_LIBRARY_NAME "clange_me" CACHE STRING "Native library name without lib p
 set(MOD_MINECRAFT_VERSIONS "[\"1.26.*\"]" CACHE STRING "Raw JSON array for manifest minecraft_versions")
 set(MOD_ICON "" CACHE STRING "Optional package-relative icon path, such as icon.png")
 
+# ==============================================================================
+# LUA STATIC LIBRARY COMPILATION (FIXED PATH SCOPE)
+# ==============================================================================
+# Mendefinisikan secara eksplisit seluruh source file C Lua dari folder include lokal
+set(LUA_SOURCES
+    ${PROJECT_SOURCE_DIR}/include/lapi.c
+    ${PROJECT_SOURCE_DIR}/include/lcode.c
+    ${PROJECT_SOURCE_DIR}/include/lctype.c
+    ${PROJECT_SOURCE_DIR}/include/ldebug.c
+    ${PROJECT_SOURCE_DIR}/include/ldo.c
+    ${PROJECT_SOURCE_DIR}/include/ldump.c
+    ${PROJECT_SOURCE_DIR}/include/lfunc.c
+    ${PROJECT_SOURCE_DIR}/include/lgc.c
+    ${PROJECT_SOURCE_DIR}/include/llex.c
+    ${PROJECT_SOURCE_DIR}/include/lmem.c
+    ${PROJECT_SOURCE_DIR}/include/lobject.c
+    ${PROJECT_SOURCE_DIR}/include/lopcodes.c
+    ${PROJECT_SOURCE_DIR}/include/lparser.c
+    ${PROJECT_SOURCE_DIR}/include/lstate.c
+    ${PROJECT_SOURCE_DIR}/include/lstring.c
+    ${PROJECT_SOURCE_DIR}/include/ltable.c
+    ${PROJECT_SOURCE_DIR}/include/ltm.c
+    ${PROJECT_SOURCE_DIR}/include/lundump.c
+    ${PROJECT_SOURCE_DIR}/include/lvm.c
+    ${PROJECT_SOURCE_DIR}/include/lzio.c
+    ${PROJECT_SOURCE_DIR}/include/lauxlib.c
+    ${PROJECT_SOURCE_DIR}/include/lbaselib.c
+    ${PROJECT_SOURCE_DIR}/include/lcorolib.c
+    ${PROJECT_SOURCE_DIR}/include/ldblib.c
+    ${PROJECT_SOURCE_DIR}/include/liolib.c
+    ${PROJECT_SOURCE_DIR}/include/lmathlib.c
+    ${PROJECT_SOURCE_DIR}/include/loslib.c
+    ${PROJECT_SOURCE_DIR}/include/lstrlib.c
+    ${PROJECT_SOURCE_DIR}/include/ltablib.c
+    ${PROJECT_SOURCE_DIR}/include/lutf8lib.c
+    ${PROJECT_SOURCE_DIR}/include/lloadlib.c
+    ${PROJECT_SOURCE_DIR}/include/linit.c
+)
+
+# Buat library static menggunakan path absolute root project utama
+add_library(lua_static STATIC ${LUA_SOURCES})
+
+# Ekspos directory include lokal agar file header Lua (.h) bisa diakses global
+target_include_directories(lua_static PUBLIC ${PROJECT_SOURCE_DIR}/include)
+# ==============================================================================
+
 include(FetchContent)
 
 FetchContent_Declare(
@@ -50,56 +96,6 @@ FetchContent_MakeAvailable(preloader_android nlohmann_json boost_pfr magic_enum 
 
 FetchContent_GetProperties(preloader_android)
 set(LEVI_PRELOADER_INCLUDE_DIR "${preloader_android_SOURCE_DIR}/include")
-
-# ==========================================
-# LUA STATIC LIBRARY COMPILATION (FIXED)
-# ==========================================
-# Target folder source file Lua yang ditarik dari FetchContent Preloader
-set(LUA_SRC_DIR "${preloader_android_SOURCE_DIR}/include")
-
-# Deklarasi file .c secara eksplisit untuk mencegah error "No SOURCES given" di CI/CD
-# Definisikan semua source file Lua yang berada di dalam folder include milik Anda
-set(LUA_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/lapi.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/lcode.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/lctype.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/ldebug.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/ldo.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/ldump.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/lfunc.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/lgc.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/llex.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/lmem.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/lobject.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/lopcodes.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/lparser.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/lstate.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/lstring.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/ltable.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/ltm.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/lundump.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/lvm.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/lzio.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/lauxlib.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/lbaselib.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/lcorolib.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/ldblib.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/liolib.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/lmathlib.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/loslib.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/lstrlib.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/ltablib.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/lutf8lib.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/lloadlib.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/linit.c
-)
-
-# Buat library static dari file-file di atas
-add_library(lua_static STATIC ${LUA_SOURCES})
-
-# Beritahu compiler agar bisa menemukan file .h (header) di folder include tersebut
-target_include_directories(lua_static PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-# ==========================================
 
 if(NOT ANDROID)
     set(LEVI_GENERATED_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated-config")
@@ -199,7 +195,7 @@ target_link_libraries(${MOD_LIBRARY_NAME} PRIVATE
     Boost::pfr
     magic_enum::magic_enum
     fmt::fmt
-    lua_static  # <-- Menautkan mesin statis Lua untuk mematikan error undefined symbols
+    lua_static  # Menautkan mesin statis Lua lokal
 )
 
 if(TARGET preloader)
