@@ -86,6 +86,7 @@ set(LUA_SOURCES
     "${LUA_SRC_DIR}/ldblib.c"
     "${LUA_SRC_DIR}/liolib.c"
     "${LUA_SRC_DIR}/lmathlib.c"
+    "${LUA_SRC_DIR}/lloadlib.c"
     "${LUA_SRC_DIR}/loslib.c"
     "${LUA_SRC_DIR}/lstrlib.c"
     "${LUA_SRC_DIR}/ltablib.c"
