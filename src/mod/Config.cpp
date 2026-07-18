@@ -1,6 +1,6 @@
 #include "mod/Config.h"
 
-namespace loader {
+namespace clange_me {
 
 nlohmann::json makeDefaultConfigJson() { return pl::config::defaultJson(ModConfig{}); }
 
