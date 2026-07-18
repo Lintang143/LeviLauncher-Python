@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(levilauncher_android_mod_template LANGUAGES CXX)
+project(levilauncher_android_mod_template LANGUAGES CXX C) # Ditambahkan C untuk compiler Lua
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -50,6 +50,27 @@ FetchContent_MakeAvailable(preloader_android nlohmann_json boost_pfr magic_enum 
 
 FetchContent_GetProperties(preloader_android)
 set(LEVI_PRELOADER_INCLUDE_DIR "${preloader_android_SOURCE_DIR}/include")
+
+# ==========================================
+# LUA STATIC LIBRARY COMPILATION
+# ==========================================
+# Ambil semua file source .c bawaan Lua di folder thirdparty/lua
+file(GLOB LUA_SOURCES 
+    "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/lua/*.c"
+)
+
+# Buang CLI wrappers lua.c dan luac.c agar tidak bentrok symbols main()
+list(REMOVE_ITEM LUA_SOURCES 
+    "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/lua/lua.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/lua/luac.c"
+)
+
+# Buat static library internal untuk dependency engine Lua
+add_library(lua_static STATIC ${LUA_SOURCES})
+
+# Daftarkan lokasi include directory milik Lua agar bisa diakses target lain
+target_include_directories(lua_static PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/lua")
+# ==========================================
 
 if(NOT ANDROID)
     set(LEVI_GENERATED_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated-config")
@@ -149,6 +170,7 @@ target_link_libraries(${MOD_LIBRARY_NAME} PRIVATE
     Boost::pfr
     magic_enum::magic_enum
     fmt::fmt
+    lua_static  # <-- TAUTKAN INTERNAL LUA ENGINE DI SINI
 )
 
 if(TARGET preloader)
