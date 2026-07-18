@@ -3,7 +3,7 @@
 #include <pl/Mod.hpp>          //[span_0](start_span)[span_0](end_span)
 #include "pl/LuaBinding.hpp"  // Include our native binding file
 
-namespace loader {
+namespace clange_me {
 
 ClangeMeMod &ClangeMeMod::instance() {
     static ClangeMeMod instance;
