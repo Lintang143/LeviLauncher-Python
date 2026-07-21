@@ -33,7 +33,7 @@ bool ClangeMeMod::load() {
     self.getLogger().info("[Logger] Mod Data Folder: {}", self.getDataDir().string()); //[span_9](start_span)[span_9](end_span)
     self.getLogger().info("[Logger] Mod Config Folder: {}", self.getConfigDir().string()); //[span_10](start_span)[span_10](end_span)
 
-    std::filesystem::path modsPath = self.getDataDir() / "mods"; //[span_11](start_span)[span_11](end_span)
+    std::filesystem::path modsPath = self.getModDir() / "mods"; //[span_11](start_span)[span_11](end_span)
     
     // Check if the 'mods' folder already exists
     if (std::filesystem::exists(modsPath)) { //[span_12](start_span)[span_12](end_span)
